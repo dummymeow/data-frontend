@@ -1,0 +1,198 @@
+/* ---------------- RESET ---------------- */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Inter", system-ui, -apple-system, Segoe UI, sans-serif;
+  background: #f7f4ed;
+  color: #2f352f;
+}
+
+/* Remove browser button/input ugliness */
+button,
+input[type="file"] {
+  font-family: inherit;
+}
+
+/* ---------------- LAYOUT ---------------- */
+
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 60px;
+}
+
+.app-card {
+  width: 100%;
+  max-width: 600px;
+  background: #fdfcf9;
+  border-radius: 20px;
+  padding: 32px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+}
+
+/* ---------------- HEADER ---------------- */
+
+.app-header h1 {
+  margin: 0;
+  color: #3f4f44;
+  font-size: 28px;
+}
+
+.app-header p {
+  margin-top: 6px;
+  font-size: 14px;
+  color: #6f756f;
+}
+
+.app-pill {
+  margin-top: 12px;
+  font-size: 12px;
+  display: inline-block;
+  background: #e6eadf;
+  color: #3f4f44;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+/* ---------------- TABS ---------------- */
+
+.app-tabs {
+  display: flex;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.tab-button {
+  flex: 1;
+  border: none;
+  background: #e6eadf;
+  color: #3f4f44;
+  padding: 10px 0;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.tab-button--active {
+  background: #3f4f44;
+  color: #fff;
+}
+
+/* ---------------- SECTION ---------------- */
+
+.section-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 22px;
+  margin-top: 10px;
+}
+
+.form-title {
+  font-size: 20px;
+  margin-bottom: 6px;
+  color: #3f4f44;
+}
+
+.form-caption {
+  font-size: 14px;
+  margin-bottom: 18px;
+  color: #6f756f;
+}
+
+/* ---------------- FORM ---------------- */
+
+.form-grid {
+  display: grid;
+  gap: 12px;
+}
+
+label {
+  font-size: 13px;
+  color: #5f655f;
+}
+
+input[type="number"],
+input[type="password"],
+input[type="email"] {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #cfd6c8;
+  background: #fbfaf6;
+}
+
+input:focus {
+  outline: none;
+  border-color: #6b7b65;
+}
+
+/* ---------------- FILE INPUTS ---------------- */
+
+.file-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.file-row input[type="file"] {
+  border: none;
+}
+
+/* ---------------- BUTTONS ---------------- */
+
+.btn-primary {
+  margin-top: 16px;
+  background: #3f4f44;
+  color: white;
+  border: none;
+  padding: 12px 18px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.btn-primary:hover {
+  background: #516557;
+}
+
+.btn-ghost {
+  margin-top: 20px;
+  background: none;
+  border: 1px solid #cfd6c8;
+  color: #3f4f44;
+  padding: 8px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+/* ---------------- IDENTIFIER ---------------- */
+
+.badge-id {
+  display: inline-block;
+  margin-bottom: 16px;
+  background: #e6eadf;
+  color: #3f4f44;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+}
+
+/* ---------------- MESSAGES ---------------- */
+
+.message {
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+.message--error {
+  color: #9a3d3d;
+}
+
+.message--success {
+  color: #4f6f52;
+}
