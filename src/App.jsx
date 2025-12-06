@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-// JSON helper
+// Helper for JSON requests
 async function apiJson(path, method, body) {
   const token = localStorage.getItem('token');
   const res = await fetch(`${API_BASE_URL}${path}`, {
@@ -19,14 +19,12 @@ async function apiJson(path, method, body) {
   return data;
 }
 
-function App() {
-  const [page, setPage] = useState('login'); // 'login' | 'register' | 'upload'
+export default function App() {
+  const [page, setPage] = useState('login');
   const [token, setToken] = useState(localStorage.getItem('token'));
 
   useEffect(() => {
-    if (token && page === 'login') {
-      setPage('upload');
-    }
+    if (token && page === 'login') setPage('upload');
   }, [token, page]);
 
   const logout = () => {
@@ -42,63 +40,43 @@ function App() {
         <div className="app-header">
           <div className="app-title-group">
             <h1>Data Capture Console</h1>
-            <p>Sign in, register and upload image samples for preprocessing.</p>
           </div>
-          <div className="app-pill">MERN • Atlas • Render ready</div>
         </div>
 
-        {/* Tabs */}
+        {/* Navigation Tabs */}
         <div className="app-tabs">
           <button
-            className={
-              'tab-button ' + (page === 'register' ? 'tab-button--active' : '')
-            }
+            className={`tab-button ${page === 'register' ? 'tab-button--active' : ''}`}
             onClick={() => setPage('register')}
           >
             Register
           </button>
           <button
-            className={
-              'tab-button ' + (page === 'login' ? 'tab-button--active' : '')
-            }
+            className={`tab-button ${page === 'login' ? 'tab-button--active' : ''}`}
             onClick={() => setPage('login')}
           >
             Login
           </button>
           <button
-            className={
-              'tab-button ' +
-              (page === 'upload' && token ? 'tab-button--active' : '')
-            }
+            className={`tab-button ${page === 'upload' && token ? 'tab-button--active' : ''}`}
             onClick={() => token && setPage('upload')}
           >
             Upload
           </button>
         </div>
 
-        {/* Sections */}
+        {/* Page Routing */}
         {page === 'register' && <Register />}
         {page === 'login' && (
           <Login onLogin={setToken} goUpload={() => setPage('upload')} />
         )}
         {page === 'upload' && token && <Upload />}
-        {page === 'upload' && !token && (
-          <div className="section-card">
-            <p className="form-title">Authentication required</p>
-            <p className="form-caption">
-              Please login first before uploading data records.
-            </p>
-          </div>
-        )}
+        {page === 'upload' && !token && <Blocked />}
 
-        {/* Global logout footer */}
+        {/* Logout */}
         {token && (
           <div
-            style={{
-              marginTop: '0.75rem',
-              display: 'flex',
-              justifyContent: 'flex-end',
-            }}
+            style={{ marginTop: '0.75rem', display: 'flex', justifyContent: 'flex-end' }}
           >
             <button className="btn-ghost" onClick={logout}>
               Log out
@@ -110,20 +88,22 @@ function App() {
   );
 }
 
-// ---- Register ----
+/* ---------------- REGISTER ---------------- */
+
 function Register() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [msg, setMsg] = useState('');
   const [isError, setIsError] = useState(false);
 
-  const handleSubmit = async (e) => {
+  const submit = async (e) => {
     e.preventDefault();
     setMsg('');
     setIsError(false);
+
     try {
       await apiJson('/api/auth/register', 'POST', { email, password });
-      setMsg('Registered successfully. You can now log in.');
+      setMsg('Registered successfully.');
     } catch (err) {
       setIsError(true);
       setMsg(err.message);
@@ -132,12 +112,9 @@ function Register() {
 
   return (
     <div className="section-card">
-      <h2 className="form-title">Create an account</h2>
-      <p className="form-caption">
-        Use an email and password you don’t mind using for testing.
-      </p>
+      <h2 className="form-title">Create Account</h2>
 
-      <form onSubmit={handleSubmit} className="form-grid">
+      <form onSubmit={submit} className="form-grid">
         <div className="form-field">
           <label>Email</label>
           <input
@@ -149,6 +126,7 @@ function Register() {
             onChange={(e) => setEmail(e.target.value)}
           />
         </div>
+
         <div className="form-field">
           <label>Password</label>
           <input
@@ -162,10 +140,9 @@ function Register() {
         </div>
 
         <div className="section-footer">
-          <button type="submit" className="btn-primary">
-            Create account
+          <button className="btn-primary" type="submit">
+            Register
           </button>
-          <small>Passwords are stored as hashes in MongoDB.</small>
         </div>
       </form>
 
@@ -178,22 +155,23 @@ function Register() {
   );
 }
 
-// ---- Login ----
+/* ---------------- LOGIN ---------------- */
+
 function Login({ onLogin, goUpload }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [msg, setMsg] = useState('');
   const [isError, setIsError] = useState(false);
 
-  const handleSubmit = async (e) => {
+  const submit = async (e) => {
     e.preventDefault();
-    setMsg('');
     setIsError(false);
+    setMsg('');
+
     try {
       const data = await apiJson('/api/auth/login', 'POST', { email, password });
       localStorage.setItem('token', data.token);
       onLogin(data.token);
-      setMsg('Logged in successfully.');
       goUpload();
     } catch (err) {
       setIsError(true);
@@ -203,12 +181,9 @@ function Login({ onLogin, goUpload }) {
 
   return (
     <div className="section-card">
-      <h2 className="form-title">Welcome back</h2>
-      <p className="form-caption">
-        Login to continue uploading image samples and numeric metadata.
-      </p>
+      <h2 className="form-title">Login</h2>
 
-      <form onSubmit={handleSubmit} className="form-grid">
+      <form onSubmit={submit} className="form-grid">
         <div className="form-field">
           <label>Email</label>
           <input
@@ -233,10 +208,9 @@ function Login({ onLogin, goUpload }) {
         </div>
 
         <div className="section-footer">
-          <button type="submit" className="btn-primary">
+          <button className="btn-primary" type="submit">
             Login
           </button>
-          <small>Session is handled with a JWT stored in local storage.</small>
         </div>
       </form>
 
@@ -249,24 +223,29 @@ function Login({ onLogin, goUpload }) {
   );
 }
 
-// ---- Upload ----
+/* ---------------- UPLOAD ---------------- */
+
 function Upload() {
   const [uniqueId, setUniqueId] = useState('');
-  const [num1, setNum1] = useState('');
-  const [num2, setNum2] = useState('');
-  const [files, setFiles] = useState([null, null, null]);
   const [msg, setMsg] = useState('');
   const [isError, setIsError] = useState(false);
 
+  const [vals, setVals] = useState({
+    c0: '',
+    c5: '',
+    c10: '',
+    c20: '',
+    cElbow: '',
+  });
+
   useEffect(() => {
-    const fetchId = async () => {
+    const loadId = async () => {
       try {
         const token = localStorage.getItem('token');
         const res = await fetch(`${API_BASE_URL}/api/records/new-id`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
+
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || 'Failed to get ID');
         setUniqueId(data.uniqueId);
@@ -275,45 +254,45 @@ function Upload() {
         setMsg(err.message);
       }
     };
-    fetchId();
+
+    loadId();
   }, []);
 
-  const handleFileChange = (idx, file) => {
-    const newFiles = [...files];
-    newFiles[idx] = file;
-    setFiles(newFiles);
-  };
-
-  const handleSubmit = async (e) => {
+  const submit = async (e) => {
     e.preventDefault();
     setMsg('');
     setIsError(false);
 
-    if (files.some((f) => !f)) {
+    const { c0, c5, c10, c20, cElbow } = vals;
+    if ([c0, c5, c10, c20, cElbow].some((v) => v === '' || v === null)) {
       setIsError(true);
-      setMsg('Please select all 3 images.');
+      setMsg('Please fill all 5 values.');
       return;
     }
 
-    const token = localStorage.getItem('token');
-    const formData = new FormData();
-    formData.append('uniqueId', uniqueId);
-    formData.append('num1', num1);
-    formData.append('num2', num2);
-    files.forEach((file) => formData.append('images', file));
-
     try {
+      const token = localStorage.getItem('token');
+
       const res = await fetch(`${API_BASE_URL}/api/records`, {
         method: 'POST',
         headers: {
+          'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: formData,
+        body: JSON.stringify({
+          uniqueId,
+          c0: Number(c0),
+          c5: Number(c5),
+          c10: Number(c10),
+          c20: Number(c20),
+          cElbow: Number(cElbow),
+        }),
       });
+
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Upload failed');
-      setMsg('Uploaded successfully.');
-      setIsError(false);
+
+      setMsg('Saved successfully.');
     } catch (err) {
       setIsError(true);
       setMsg(err.message);
@@ -322,82 +301,50 @@ function Upload() {
 
   return (
     <div className="section-card">
-      <h2 className="form-title">Upload record</h2>
-      <p className="form-caption">
-        Attach 3 images and 2 numeric fields. All assets are stored in MongoDB for
-        later preprocessing.
-      </p>
+      <h2 className="form-title">Upload Measurements</h2>
 
       <div className="badge-id">
         <span className="badge-dot" />
-        <span>Unique ID</span>
-        <strong>{uniqueId || 'generating…'}</strong>
+        <span>ID</span>
+        <strong>{uniqueId || '…'}</strong>
       </div>
 
-      <form onSubmit={handleSubmit} className="form-grid">
-        <div className="form-field">
-          <label>Numeric field 1</label>
-          <input
-            className="form-input"
-            type="number"
-            required
-            value={num1}
-            onChange={(e) => setNum1(e.target.value)}
-            placeholder="e.g. 42"
-          />
-        </div>
-
-        <div className="form-field">
-          <label>Numeric field 2</label>
-          <input
-            className="form-input"
-            type="number"
-            required
-            value={num2}
-            onChange={(e) => setNum2(e.target.value)}
-            placeholder="e.g. 7.5"
-          />
-        </div>
-
-        <div className="form-field">
-          <label>Images (exactly 3)</label>
-
-          <div className="file-row">
-            <span className="file-label">Image 1</span>
-            <input
-              className="form-file"
-              type="file"
-              accept="image/*"
-              onChange={(e) => handleFileChange(0, e.target.files[0])}
-            />
-          </div>
-
-          <div className="file-row">
-            <span className="file-label">Image 2</span>
-            <input
-              className="form-file"
-              type="file"
-              accept="image/*"
-              onChange={(e) => handleFileChange(1, e.target.files[0])}
-            />
-          </div>
-
-          <div className="file-row">
-            <span className="file-label">Image 3</span>
-            <input
-              className="form-file"
-              type="file"
-              accept="image/*"
-              onChange={(e) => handleFileChange(2, e.target.files[0])}
-            />
-          </div>
-        </div>
+      <form onSubmit={submit} className="form-grid">
+        <table className="measure-table">
+          <thead>
+            <tr>
+              <th>Position</th>
+              <th>0 cm</th>
+              <th>5 cm</th>
+              <th>10 cm</th>
+              <th>20 cm</th>
+              <th>Elbow</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Circumference</td>
+              {['c0', 'c5', 'c10', 'c20', 'cElbow'].map((key) => (
+                <td key={key}>
+                  <input
+                    className="form-input"
+                    type="number"
+                    step="0.01"
+                    value={vals[key]}
+                    onChange={(e) =>
+                      setVals((prev) => ({ ...prev, [key]: e.target.value }))
+                    }
+                  />
+                </td>
+              ))}
+            </tr>
+          </tbody>
+        </table>
 
         <div className="section-footer">
-          <button type="submit" className="btn-primary">
-            Upload record
+          <button className="btn-primary" type="submit">
+            Save
           </button>
-          <small>Images are uploaded as binary buffers and linked to this ID.</small>
         </div>
       </form>
 
@@ -410,4 +357,13 @@ function Upload() {
   );
 }
 
-export default App;
+/* -------- BLOCKED (not logged in) -------- */
+
+function Blocked() {
+  return (
+    <div className="section-card">
+      <h2 className="form-title">Authentication Required</h2>
+      <p>Please login to access the upload panel.</p>
+    </div>
+  );
+}
