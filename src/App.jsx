@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-// Helper for JSON requests
+// JSON helper
 async function apiJson(path, method, body) {
   const token = localStorage.getItem('token');
   const res = await fetch(`${API_BASE_URL}${path}`, {
@@ -36,14 +36,12 @@ export default function App() {
   return (
     <div className="app-shell">
       <div className="app-card">
-        {/* Header */}
         <div className="app-header">
           <div className="app-title-group">
             <h1>Data Capture Console</h1>
           </div>
         </div>
 
-        {/* Navigation Tabs */}
         <div className="app-tabs">
           <button
             className={`tab-button ${page === 'register' ? 'tab-button--active' : ''}`}
@@ -65,7 +63,6 @@ export default function App() {
           </button>
         </div>
 
-        {/* Page Routing */}
         {page === 'register' && <Register />}
         {page === 'login' && (
           <Login onLogin={setToken} goUpload={() => setPage('upload')} />
@@ -73,7 +70,6 @@ export default function App() {
         {page === 'upload' && token && <Upload />}
         {page === 'upload' && !token && <Blocked />}
 
-        {/* Logout */}
         {token && (
           <div
             style={{ marginTop: '0.75rem', display: 'flex', justifyContent: 'flex-end' }}
@@ -88,7 +84,7 @@ export default function App() {
   );
 }
 
-/* ---------------- REGISTER ---------------- */
+/* ---------- Register ---------- */
 
 function Register() {
   const [email, setEmail] = useState('');
@@ -100,7 +96,6 @@ function Register() {
     e.preventDefault();
     setMsg('');
     setIsError(false);
-
     try {
       await apiJson('/api/auth/register', 'POST', { email, password });
       setMsg('Registered successfully.');
@@ -113,7 +108,6 @@ function Register() {
   return (
     <div className="section-card">
       <h2 className="form-title">Create Account</h2>
-
       <form onSubmit={submit} className="form-grid">
         <div className="form-field">
           <label>Email</label>
@@ -121,31 +115,26 @@ function Register() {
             className="form-input"
             type="email"
             required
-            placeholder="you@example.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
         </div>
-
         <div className="form-field">
           <label>Password</label>
           <input
             className="form-input"
             type="password"
             required
-            placeholder="••••••••"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
-
         <div className="section-footer">
           <button className="btn-primary" type="submit">
             Register
           </button>
         </div>
       </form>
-
       {msg && (
         <p className={`message ${isError ? 'message--error' : 'message--success'}`}>
           {msg}
@@ -155,7 +144,7 @@ function Register() {
   );
 }
 
-/* ---------------- LOGIN ---------------- */
+/* ---------- Login ---------- */
 
 function Login({ onLogin, goUpload }) {
   const [email, setEmail] = useState('');
@@ -165,8 +154,8 @@ function Login({ onLogin, goUpload }) {
 
   const submit = async (e) => {
     e.preventDefault();
-    setIsError(false);
     setMsg('');
+    setIsError(false);
 
     try {
       const data = await apiJson('/api/auth/login', 'POST', { email, password });
@@ -182,7 +171,6 @@ function Login({ onLogin, goUpload }) {
   return (
     <div className="section-card">
       <h2 className="form-title">Login</h2>
-
       <form onSubmit={submit} className="form-grid">
         <div className="form-field">
           <label>Email</label>
@@ -190,7 +178,6 @@ function Login({ onLogin, goUpload }) {
             className="form-input"
             type="email"
             required
-            placeholder="you@example.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
@@ -201,19 +188,16 @@ function Login({ onLogin, goUpload }) {
             className="form-input"
             type="password"
             required
-            placeholder="Your password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
-
         <div className="section-footer">
           <button className="btn-primary" type="submit">
             Login
           </button>
         </div>
       </form>
-
       {msg && (
         <p className={`message ${isError ? 'message--error' : 'message--success'}`}>
           {msg}
@@ -223,7 +207,7 @@ function Login({ onLogin, goUpload }) {
   );
 }
 
-/* ---------------- UPLOAD ---------------- */
+/* ---------- Upload (now includes elbowPosition) ---------- */
 
 function Upload() {
   const [uniqueId, setUniqueId] = useState('');
@@ -236,6 +220,7 @@ function Upload() {
     c10: '',
     c20: '',
     cElbow: '',
+    elbowPosition: '',
   });
 
   useEffect(() => {
@@ -245,7 +230,6 @@ function Upload() {
         const res = await fetch(`${API_BASE_URL}/api/records/new-id`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || 'Failed to get ID');
         setUniqueId(data.uniqueId);
@@ -254,7 +238,6 @@ function Upload() {
         setMsg(err.message);
       }
     };
-
     loadId();
   }, []);
 
@@ -263,16 +246,15 @@ function Upload() {
     setMsg('');
     setIsError(false);
 
-    const { c0, c5, c10, c20, cElbow } = vals;
-    if ([c0, c5, c10, c20, cElbow].some((v) => v === '' || v === null)) {
+    const { c0, c5, c10, c20, cElbow, elbowPosition } = vals;
+    if ([c0, c5, c10, c20, cElbow, elbowPosition].some((v) => v === '' || v === null)) {
       setIsError(true);
-      setMsg('Please fill all 5 values.');
+      setMsg('Please fill all measurements including elbow position.');
       return;
     }
 
     try {
       const token = localStorage.getItem('token');
-
       const res = await fetch(`${API_BASE_URL}/api/records`, {
         method: 'POST',
         headers: {
@@ -286,12 +268,11 @@ function Upload() {
           c10: Number(c10),
           c20: Number(c20),
           cElbow: Number(cElbow),
+          elbowPosition: Number(elbowPosition),
         }),
       });
-
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Upload failed');
-
       setMsg('Saved successfully.');
     } catch (err) {
       setIsError(true);
@@ -341,6 +322,20 @@ function Upload() {
           </tbody>
         </table>
 
+        {/* NEW: extra attribute below table */}
+        <div className="form-field" style={{ marginTop: '0.75rem' }}>
+          <label>Elbow position (cm)</label>
+          <input
+            className="form-input"
+            type="number"
+            step="0.01"
+            value={vals.elbowPosition}
+            onChange={(e) =>
+              setVals((prev) => ({ ...prev, elbowPosition: e.target.value }))
+            }
+          />
+        </div>
+
         <div className="section-footer">
           <button className="btn-primary" type="submit">
             Save
@@ -357,7 +352,7 @@ function Upload() {
   );
 }
 
-/* -------- BLOCKED (not logged in) -------- */
+/* ---------- Blocked ---------- */
 
 function Blocked() {
   return (
